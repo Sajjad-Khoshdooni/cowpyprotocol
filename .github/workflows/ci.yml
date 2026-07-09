@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cow
+          POSTGRES_PASSWORD: cow
+          POSTGRES_DB: cow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch database migrations
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/cowprotocol/services.git /tmp/cow-services
+          cd /tmp/cow-services && git sparse-checkout set database
+          ln -sf /tmp/cow-services/database database
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.5.26"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --all-packages
+
+      - name: Lint
+        run: uv run ruff check packages/ tests/
+
+      - name: Unit tests
+        run: uv run pytest packages/ tests/ -m "not postgres and not e2e" -v
+
+      - name: Apply database migrations
+        env:
+          PGPASSWORD: cow
+        run: |
+          psql "postgresql://cow:cow@localhost:5432/cow" -c "
+            CREATE TABLE IF NOT EXISTS schema_migrations (
+              version INTEGER PRIMARY KEY,
+              description TEXT NOT NULL,
+              applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );"
+          for f in database/sql/V*.sql; do
+            version=$(basename "$f" | sed -E 's/^V([0-9]+)__.*/\1/')
+            desc=$(basename "$f" | sed -E 's/^V[0-9]+__(.+)\.sql/\1/')
+            applied=$(psql "postgresql://cow:cow@localhost:5432/cow" -tAc "SELECT 1 FROM schema_migrations WHERE version = $version")
+            if [ "$applied" != "1" ]; then
+              echo "Applying $f"
+              psql "postgresql://cow:cow@localhost:5432/cow" -v ON_ERROR_STOP=1 -f "$f"
+              psql "postgresql://cow:cow@localhost:5432/cow" -c "INSERT INTO schema_migrations (version, description) VALUES ($version, '$desc');"
+            fi
+          done
+
+      - name: Database tests
+        env:
+          DB_WRITE_URL: postgresql://cow:cow@localhost:5432/cow
+          DB_READ_URL: postgresql://cow:cow@localhost:5432/cow
+        run: uv run pytest -m postgres -v --tb=short
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t cowpyprotocol:latest .

@@ -1,0 +1,27 @@
+[project]
+name = "cow-pool-indexer"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "cow-database",
+    "cow-ethrpc",
+    "cow-observe",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "typer>=0.12",
+]
+
+[project.scripts]
+cow-pool-indexer = "cow_pool_indexer.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cow_pool_indexer"]
+
+[tool.uv.sources]
+cow-database = { workspace = true }
+cow-ethrpc = { workspace = true }
+cow-observe = { workspace = true }

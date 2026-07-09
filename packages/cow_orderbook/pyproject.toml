@@ -1,0 +1,36 @@
+[project]
+name = "cow-orderbook"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "cow-configs",
+    "cow-database",
+    "cow-model",
+    "cow-observe",
+    "cow-shared",
+    "cow-price-estimation",
+    "cow-ethrpc",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sse-starlette>=2.0",
+    "typer>=0.12",
+]
+
+[project.scripts]
+cow-orderbook = "cow_orderbook.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cow_orderbook"]
+
+[tool.uv.sources]
+cow-configs = { workspace = true }
+cow-database = { workspace = true }
+cow-model = { workspace = true }
+cow-observe = { workspace = true }
+cow-shared = { workspace = true }
+cow-price-estimation = { workspace = true }
+cow-ethrpc = { workspace = true }

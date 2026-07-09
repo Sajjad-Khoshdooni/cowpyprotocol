@@ -1,0 +1,13 @@
+eip1271-skip-creation-validation = true
+bind-address = "127.0.0.1:8080"
+
+[shared]
+node-url = "http://127.0.0.1:8545"
+simulation-node-url = "http://127.0.0.1:8545"
+
+[database]
+write-url = "%DB_WRITE_URL"
+read-url = "%DB_READ_URL"
+
+[order-quoting]
+price-estimation-drivers = [{ name = "baseline", url = "http://127.0.0.1:11088" }]

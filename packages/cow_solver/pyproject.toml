@@ -1,0 +1,16 @@
+[project]
+name = "cow-solver"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["cow-model", "cow-liquidity-sources"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cow_solver"]
+
+[tool.uv.sources]
+cow-model = { workspace = true }
+cow-liquidity-sources = { workspace = true }

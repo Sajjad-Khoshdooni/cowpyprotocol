@@ -1,0 +1,56 @@
+[project]
+name = "cowpyprotocol"
+version = "0.1.0"
+description = "CoW Protocol services — experimental Python architecture port"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "packages/cow_number",
+    "packages/cow_bytes_hex",
+    "packages/cow_model",
+    "packages/cow_configs",
+    "packages/cow_database",
+    "packages/cow_observe",
+    "packages/cow_chain",
+    "packages/cow_ethrpc",
+    "packages/cow_contracts",
+    "packages/cow_shared",
+    "packages/cow_price_estimation",
+    "packages/cow_liquidity_sources",
+    "packages/cow_solver",
+    "packages/cow_simulator",
+    "packages/cow_orderbook",
+    "packages/cow_autopilot",
+    "packages/cow_driver",
+    "packages/cow_solvers",
+    "packages/cow_refunder",
+    "packages/cow_pool_indexer",
+    "packages/cow_solana_indexer",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",
+    "ruff>=0.8",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["packages", "tests"]
+markers = [
+    "postgres: requires running PostgreSQL",
+    "e2e: end-to-end integration tests",
+    "forked: forked mainnet tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

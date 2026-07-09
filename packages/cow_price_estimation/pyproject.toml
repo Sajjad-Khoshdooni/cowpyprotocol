@@ -1,0 +1,20 @@
+[project]
+name = "cow-price-estimation"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "cow-model",
+    "cow-ethrpc",
+    "httpx>=0.27",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cow_price_estimation"]
+
+[tool.uv.sources]
+cow-model = { workspace = true }
+cow-ethrpc = { workspace = true }
